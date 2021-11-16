@@ -28,15 +28,16 @@ public class ClientThread
         BufferedReader socIn = null;
         PrintStream socOut = null;
         try {
-
             socIn = new BufferedReader(
                     new InputStreamReader(clientSocket.getInputStream()));
-            socOut = new PrintStream(clientSocket.getOutputStream());
-            String line;
-            while (true) {
-                line = socIn.readLine();
-                System.out.println(line);
-                socOut.println("ok");
+
+            while (!EchoClient.stopThread) {
+                try {
+                    String line = socIn.readLine();
+                    if(line == null) break;
+                    System.out.println(line);
+                } catch (SocketTimeoutException e) {
+                }
 
             }
         } catch (Exception e) {

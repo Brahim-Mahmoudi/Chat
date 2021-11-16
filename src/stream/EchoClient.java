@@ -6,13 +6,18 @@
  */
 package stream;
 
-import java.io.*;
-import java.net.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 
 
 public class EchoClient {
 
+    static boolean stopThread = false;
 
   /**
   *  main method
@@ -25,6 +30,7 @@ public class EchoClient {
         BufferedReader stdIn = null;
         BufferedReader socIn = null;
 
+
         if (args.length != 3) {
           System.out.println("Usage: java EchoClient <EchoServer host> <EchoServer port> <username>");
           System.exit(1);
@@ -35,39 +41,53 @@ public class EchoClient {
 
             // creation socket ==> connexion
       	    echoSocket = new Socket(args[0],new Integer(args[1]).intValue());
-	    socIn = new BufferedReader(
+            echoSocket.setSoTimeout(1000);
+	        socIn = new BufferedReader(
 	    		          new InputStreamReader(echoSocket.getInputStream()));    
-	    socOut= new PrintStream(echoSocket.getOutputStream());
-	    stdIn = new BufferedReader(new InputStreamReader(System.in));
-        //recupe le username
-        username = args[2];
-        socOut.println(username);
+	        socOut= new PrintStream(echoSocket.getOutputStream());
+	        stdIn = new BufferedReader(new InputStreamReader(System.in));
+            System.out.println("Socket created");
+            System.out.println(echoSocket);
+            //recupe le username
+            username = args[2];
+            socOut.println(username);
 
-        if(stdIn.readLine().equals("Fail")){
-            System.exit(1);
-        }
+            if(stdIn.readLine().equals("Fail")){
+                System.exit(1);
+            }
 
-        } catch (UnknownHostException e) {
-            System.err.println("Don't know about host:" + args[0]);
-            System.exit(1);
-        } catch (IOException e) {
-            System.err.println("Couldn't get I/O for "
-                               + "the connection to:"+ args[0]);
-            System.exit(1);
-        }
+            // creation Thread d'écoute
+            //Créer un  thread pour lire l'entrée du terminal client
+            ClientThread threadListener;
+            threadListener = new ClientThread(echoSocket);
+            threadListener.start();
+
+            String line;
+
+            while (true) {
+                line=stdIn.readLine();
+                if (line.equals(".")) {
+                    stopThread = true;
+                    while(threadListener.getState() == Thread.State.RUNNABLE) {}
+                    break;
+                }
+                socOut.println(line);
+                System.out.println("message send !");
+
+
+
+                //System.out.println("echo out :" + socOut.println());
+            }
+            } catch (UnknownHostException e) {
+                System.err.println("Don't know about host:" + args[0]);
+                System.exit(1);
+            } catch (IOException e) {
+                System.err.println("Couldn't get I/O for "
+                                   + "the connection to:"+ args[0]);
+                System.exit(1);
+            }
                              
-        String line;
 
-        while (true) {
-        	line=stdIn.readLine();
-        	if (line.equals(".")) break;
-        	socOut.println(line);
-            System.out.println(socIn.readLine());
-
-
-
-            //System.out.println("echo out :" + socOut.println());
-        }
       socOut.close();
       socIn.close();
       stdIn.close();
