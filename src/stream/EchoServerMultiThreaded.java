@@ -29,6 +29,7 @@ public class EchoServerMultiThreaded  {
                 System.out.println("Connexion from:" + clientSocket.getInetAddress());
                 ClientThread ct = new ClientThread(clientSocket);
                 ct.start();
+
             }
         } catch (Exception e) {
             System.err.println("Error in EchoServer:" + e);
