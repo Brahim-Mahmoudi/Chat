@@ -11,7 +11,7 @@ import java.io.*;
 import java.net.*;
 
 public class EchoServer  {
-	public static int i = 0;
+
  	/**
   	* receives a request from client then sends an echo to the client
   	* @param clientSocket the client socket
@@ -23,9 +23,13 @@ public class EchoServer  {
     			new InputStreamReader(clientSocket.getInputStream()));    
     		PrintStream socOut = new PrintStream(clientSocket.getOutputStream());
     		while (true) {
-
     		  String line = socIn.readLine();
-    		  socOut.println(line+ i++);
+			  //String line1 = socIn.readLine();
+    		  socOut.println(line);
+			  //socOut.println(line1);
+			  //System.out.println(line);
+			  //System.out.println(line1);
+    		  socOut.println(line);
     		}
     	} catch (Exception e) {
         	System.err.println("Error in EchoServer:" + e); 

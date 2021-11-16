@@ -15,6 +15,8 @@ public class ClientThread
 
     private Socket clientSocket;
 
+
+
     ClientThread(Socket s) {
         this.clientSocket = s;
     }
@@ -23,18 +25,47 @@ public class ClientThread
      * receives a request from client then sends an echo to the client
      **/
     public void run() {
+        BufferedReader socIn = null;
+        PrintStream socOut = null;
         try {
-            BufferedReader socIn = null;
+
             socIn = new BufferedReader(
                     new InputStreamReader(clientSocket.getInputStream()));
-            PrintStream socOut = new PrintStream(clientSocket.getOutputStream());
+            socOut = new PrintStream(clientSocket.getOutputStream());
+            String line;
             while (true) {
-                String line = socIn.readLine();
-                socOut.println(line);
+                line = socIn.readLine();
+                System.out.println(line);
+                socOut.println("ok");
+
             }
         } catch (Exception e) {
-            System.err.println("Error in EchoServer:" + e);
+            System.err.println("Error in ClientThread:" + e);
         }
+
+        finally{
+
+
+            try {
+                if(socIn != null){
+                    socIn.close();
+                }
+
+                if(socOut != null) {
+                    socOut.close();
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+
+        }
+
     }
 
+    public Socket getClientSocket() {
+        return clientSocket;
+    }
 }
