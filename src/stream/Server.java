@@ -10,17 +10,17 @@ package stream;
 
 import java.io.*;
 import java.net.*;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class EchoServerMultiThreaded  {
+public class Server {
+    //HashMap contenant les thread crée et le username du client correspondant en clé
+    static HashMap<String, ClientHelperThread> clientThreads = new HashMap<>();
 
     public static void main(String[] args){
         ServerSocket listenSocket;
         ArrayList<Integer> portLibre = new ArrayList<Integer>();
-        HashMap<String,ClientThread> clientThreads = new HashMap<String,ClientThread>();
+
 
         portLibre.add(1200);
         portLibre.add(1201);
@@ -53,37 +53,35 @@ public class EchoServerMultiThreaded  {
 
                 System.out.println("Connexion from:" + clientSocket.getLocalPort());
 
-                //Creation du thread
-                ClientThread ct = new ClientThread(demandeConnexionCLient);
-                ct.start();
-
-                //Buffer de lecture de la socket pour recuperer le username
+                //Buffer de lecture de la socket
                 BufferedReader socInClient = null;
                 socInClient = new BufferedReader(
                         new InputStreamReader(demandeConnexionCLient.getInputStream()));
 
+                //Buffer de sortie de la socket
+                PrintStream socOutClient = null;
+                socOutClient = new PrintStream(demandeConnexionCLient.getOutputStream());
+
                 //On recupere le username de l'utilisateur
                 String username = socInClient.readLine();
+
+                //Creation du thread
+                ClientHelperThread ct = new ClientHelperThread(demandeConnexionCLient,username,socInClient,socOutClient);
+                ct.start();
+
+
+
+                //Si le username existe déjà on ne le rajoute pas à la map
                 if(clientThreads.containsKey(username)){
                     System.out.println("Error, this user already exist");
+                    ct.killThread();
+                    ct.setIsConnected(false);
 
-                    PrintStream socOut= new PrintStream(demandeConnexionCLient.getOutputStream());
-                    socOut.println("Fail");
                 }else{
                     //On rajoute le thread à la liste des threads en cours
                     clientThreads.put(username,ct);
                     System.out.println(username);
                 }
-
-
-
-
-                if(clientThreads.size() > 1){
-
-                    Conversation conversation = new Conversation(clientThreads.get("zebi").getClientSocket(),clientThreads.get("brams").getClientSocket());
-                    conversation.lancerConversation();
-                }
-
 
 
             }
