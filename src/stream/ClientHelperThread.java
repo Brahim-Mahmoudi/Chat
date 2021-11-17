@@ -19,6 +19,8 @@ public class ClientHelperThread
     private boolean isConnected ;
     private  BufferedReader socIn;
     private PrintStream socOut;
+    private File fichierDeconnexion;
+    private FileWriter ecrireFichierDeco;
 
 
 
@@ -28,6 +30,13 @@ public class ClientHelperThread
         this.isConnected = true;
         this.socIn = socIn;
         this.socOut = socOut;
+        this.fichierDeconnexion = new File("./src/files/"+username+"Deconnexion.txt");
+        try {
+            this.ecrireFichierDeco = new FileWriter(fichierDeconnexion);
+        }
+        catch(IOException ex){
+            ex.printStackTrace();
+        }
 
     }
 
@@ -38,19 +47,37 @@ public class ClientHelperThread
 
         try {
 
-
             String line;
             while (true) {
-                line = socIn.readLine();
-                System.out.println(line);
 
-                for(Map.Entry<String,ClientHelperThread> client : Server.clientThreads.entrySet()){
-                    //On envoie le message à tout le monde sauf à soi même
-                    if(!(client.getKey() == username)) {
-                        client.getValue().writeAMessage(line);
-                    }
+                line = socIn.readLine();
+                if(line.equals("disconnect")){
+                    socOut.println("You are disconnected");
+                    isConnected = false;
                 }
 
+
+                if(isConnected) {
+
+                    for (Map.Entry<String, ClientHelperThread> client : Server.clientThreads.entrySet()) {
+                        //On envoie le message à tout le monde sauf à soi même
+                        if (!(client.getKey() == username) && (client.getValue().isConnected())) {
+                            client.getValue().getSocOut().println(username + " :" + line);
+
+                        }
+
+                        else if(!(client.getKey() == username) && !(client.getValue().isConnected())){
+                            System.out.println("zebi");
+                            client.getValue().getEcrireFichierDeco().write(line);
+                        }
+                    }
+
+                }
+
+                if(line.equals("connect")){
+                    isConnected = true;
+                    socOut.println("You are connected");
+                }
             }
         } catch (Exception e) {
             System.err.println("Error in ClientThread:" + e);
@@ -81,6 +108,7 @@ public class ClientHelperThread
     public synchronized void killThread(){
         try {
             clientSocket.close();
+            this.interrupt();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -90,7 +118,17 @@ public class ClientHelperThread
         this.isConnected = isConnected;
     }
 
-    public synchronized void writeAMessage (String message){
-        socOut.println(message);
+
+
+    public synchronized boolean isConnected() {
+        return isConnected;
+    }
+
+    public PrintStream getSocOut() {
+        return socOut;
+    }
+
+    public FileWriter getEcrireFichierDeco() {
+        return ecrireFichierDeco;
     }
 }

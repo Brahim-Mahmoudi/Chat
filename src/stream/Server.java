@@ -65,22 +65,17 @@ public class Server {
                 //On recupere le username de l'utilisateur
                 String username = socInClient.readLine();
 
-                //Creation du thread
-                ClientHelperThread ct = new ClientHelperThread(demandeConnexionCLient,username,socInClient,socOutClient);
-                ct.start();
-
-
-
-                //Si le username existe déjà on ne le rajoute pas à la map
+                //Si mon client existe déjà
                 if(clientThreads.containsKey(username)){
-                    System.out.println("Error, this user already exist");
-                    ct.killThread();
-                    ct.setIsConnected(false);
+                    System.out.println("Erreur, il y a dejà un utilisateur avec le même username connecte");
+                }
 
-                }else{
-                    //On rajoute le thread à la liste des threads en cours
+                else{
+                    //Creation du thread
+                    ClientHelperThread ct = new ClientHelperThread(demandeConnexionCLient,username,socInClient,socOutClient);
                     clientThreads.put(username,ct);
-                    System.out.println(username);
+                    System.out.println("Bienvenue " + username);
+                    ct.start();
                 }
 
 
