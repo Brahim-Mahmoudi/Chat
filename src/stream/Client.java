@@ -28,7 +28,7 @@ public class Client {
 
 
         if (args.length != 3) {
-            System.out.println("Usage: java EchoClient <EchoServer host> <EchoServer port> <username>");
+            System.out.println("Usage: java Client.java <EchoServer host> <EchoServer port> <username>");
             System.exit(1);
 
         }

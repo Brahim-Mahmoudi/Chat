@@ -20,7 +20,7 @@ public class ClientHelperThread
     private  BufferedReader socIn;
     private PrintStream socOut;
     private File fichierDeconnexion;
-    private FileWriter ecrireFichierDeco;
+    private PrintWriter ecrireFichierDeco;
 
 
 
@@ -32,7 +32,7 @@ public class ClientHelperThread
         this.socOut = socOut;
         this.fichierDeconnexion = new File("./src/files/"+username+"Deconnexion.txt");
         try {
-            this.ecrireFichierDeco = new FileWriter(fichierDeconnexion);
+            this.ecrireFichierDeco = new PrintWriter(fichierDeconnexion);
         }
         catch(IOException ex){
             ex.printStackTrace();
@@ -68,7 +68,13 @@ public class ClientHelperThread
 
                         else if(!(client.getKey() == username) && !(client.getValue().isConnected())){
                             System.out.println("zebi");
-                            client.getValue().getEcrireFichierDeco().write(line);
+
+                            FileWriter fw = new FileWriter("./src/files/"+client.getKey()+"Deconnexion.txt",true);
+                            fw.write( client.getKey() + " : " +line);
+                            fw.write("\n");
+                            fw.close();
+
+
                         }
                     }
 
@@ -77,6 +83,25 @@ public class ClientHelperThread
                 if(line.equals("connect")){
                     isConnected = true;
                     socOut.println("You are connected");
+                    BufferedReader lecteurAvecBuffer = null;
+                    String ligne;
+
+                    try
+                    {
+                        lecteurAvecBuffer = new BufferedReader(new FileReader("./src/files/"+username+"Deconnexion.txt"));
+                        while ((ligne = lecteurAvecBuffer.readLine()) != null)
+                        {
+                            // Afficher le contenu du fichier
+                            socOut.println (ligne);
+                        }
+                        lecteurAvecBuffer.close();
+                        fichierDeconnexion.delete();
+                        fichierDeconnexion = new File("./src/files/"+username+"Deconnexion.txt");
+                    }
+                    catch(FileNotFoundException exc)
+                    {
+                        System.out.println("Erreur d'ouverture");
+                    }
                 }
             }
         } catch (Exception e) {
@@ -128,7 +153,7 @@ public class ClientHelperThread
         return socOut;
     }
 
-    public FileWriter getEcrireFichierDeco() {
+    public PrintWriter getEcrireFichierDeco() {
         return ecrireFichierDeco;
     }
 }
