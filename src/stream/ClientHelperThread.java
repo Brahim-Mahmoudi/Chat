@@ -96,7 +96,7 @@ public class ClientHelperThread
                         }
                         lecteurAvecBuffer.close();
                         fichierDeconnexion.delete();
-                        fichierDeconnexion = new File("./src/files/"+username+"Deconnexion.txt");
+                        fichierDeconnexion.createNewFile();
                     }
                     catch(FileNotFoundException exc)
                     {
