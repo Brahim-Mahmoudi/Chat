@@ -57,7 +57,7 @@ public class ClientHelperThread
                 }
 
 
-                if(isConnected) {
+
 
                     for (Map.Entry<String, ClientHelperThread> client : Server.clientThreads.entrySet()) {
                         //On envoie le message à tout le monde sauf à soi même
@@ -72,7 +72,7 @@ public class ClientHelperThread
                         }
                     }
 
-                }
+
 
                 if(line.equals("connect")){
                     isConnected = true;
