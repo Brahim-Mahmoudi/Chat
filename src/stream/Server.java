@@ -9,22 +9,26 @@ package stream;
 
 
 import java.io.*;
-import java.net.*;
-import java.util.ArrayList;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.HashMap;
 
 public class Server {
     //HashMap contenant les thread crée et le username du client correspondant en clé
     static HashMap<String, ClientHelperThread> clientThreads = new HashMap<>();
+    static PrintWriter ecrireFichierHisto;
+
+    static {
+        try {
+            ecrireFichierHisto = new PrintWriter("./src/files/Historique.txt");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static void main(String[] args){
         ServerSocket listenSocket;
-        ArrayList<Integer> portLibre = new ArrayList<Integer>();
 
-
-        portLibre.add(1200);
-        portLibre.add(1201);
-        portLibre.add(1202);
         if (args.length != 1) {
             System.out.println("Usage: java EchoServer <EchoServer port>");
             System.exit(1);
@@ -40,18 +44,7 @@ public class Server {
                 //Recuperation demande de connexion du client
                 Socket demandeConnexionCLient = listenSocket.accept();
 
-                //Creation de la socket avec le constructeur vide car on veut changer son numero de port (bind)
-                Socket clientSocket = new Socket();
 
-                //Creation de la socketadress qui permettre de realiser le bind
-                SocketAddress socketPourBind = new InetSocketAddress(demandeConnexionCLient.getLocalAddress(),portLibre.get(0));
-                clientSocket.bind(socketPourBind);
-
-                //On a utilisé le premier port libre de la liste on le supprime donc car il n'est plus libre
-                portLibre.remove(0);
-
-
-                System.out.println("Connexion from:" + clientSocket.getLocalPort());
 
                 //Buffer de lecture de la socket
                 BufferedReader socInClient = null;
@@ -67,15 +60,34 @@ public class Server {
 
                 //Si mon client existe déjà
                 if(clientThreads.containsKey(username)){
-                    System.out.println("Erreur, il y a dejà un utilisateur avec le même username connecte");
+                    socOutClient.println("Erreur, il y a dejà un utilisateur avec le même username connecte");
                 }
 
                 else{
                     //Creation du thread
                     ClientHelperThread ct = new ClientHelperThread(demandeConnexionCLient,username,socInClient,socOutClient);
                     clientThreads.put(username,ct);
+                    System.out.println("Connexion from:" + demandeConnexionCLient.getLocalPort());
                     System.out.println("Bienvenue " + username);
                     ct.start();
+
+                    // On lui affiche les messages de l'historique
+                    String ligne;
+                    try
+                    {
+                        BufferedReader lecteurAvecBuffer = new BufferedReader(new FileReader("./src/files/Historique.txt"));
+                        while ((ligne = lecteurAvecBuffer.readLine()) != null)
+                        {
+                            // Afficher le contenu du fichier
+
+                            ct.getSocOut().println (ligne);
+                        }
+                        lecteurAvecBuffer.close();
+                    }
+                    catch(FileNotFoundException exc)
+                    {
+                        System.out.println("Erreur d'ouverture");
+                    }
                 }
 
 

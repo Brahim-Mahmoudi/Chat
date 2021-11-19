@@ -6,9 +6,14 @@
  */
 package stream;
 
-import java.io.*;
-import java.net.*;
 
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 
 public class Client {
@@ -23,6 +28,7 @@ public class Client {
   static PrintStream socOut = null;
   static BufferedReader stdIn = null;
     public static void main(String[] args) throws IOException {
+
         String username = "";
         Socket echoSocket = null;
 
@@ -68,6 +74,7 @@ public class Client {
                         String message = stdIn.readLine();
                         socOut.println(message);
 
+
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -86,11 +93,18 @@ public class Client {
                     try {
 
                         String message = socIn.readLine();
-                        System.out.println(message);
+                        if(!message.equals(null)){
+                            System.out.println(message);
+                        }
+                        if(message.equals("Erreur, il y a dejà un utilisateur avec le même username connecte")){
+                            System.exit(1);
+                        }
 
-                    } catch (IOException e) {
+
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
+
                 }
             }
         });

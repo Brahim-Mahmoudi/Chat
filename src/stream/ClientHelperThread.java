@@ -26,6 +26,7 @@ public class ClientHelperThread
 
 
 
+
     ClientHelperThread(Socket s,String username,BufferedReader socIn,PrintStream socOut) {
         this.clientSocket = s;
         this.username = username;
@@ -33,10 +34,9 @@ public class ClientHelperThread
         this.socIn = socIn;
         this.socOut = socOut;
         this.fichierDeconnexion = new File("./src/files/"+username+"Deconnexion.txt");
-        this.fichierHistorique = new File("./src/files/"+username+"Historique.txt");
+
         try {
             this.ecrireFichierDeco = new PrintWriter(fichierDeconnexion);
-            this.ecrireFichierHisto = new PrintWriter(fichierHistorique);
         }
         catch(IOException ex){
             ex.printStackTrace();
@@ -49,6 +49,7 @@ public class ClientHelperThread
      * receives a request from client then sends an echo to the client
      **/
     public void run() {
+
 
         try {
 
@@ -67,26 +68,26 @@ public class ClientHelperThread
 
                     for (Map.Entry<String, ClientHelperThread> client : Server.clientThreads.entrySet()) {
                         //On envoie le message à tout le monde sauf à soi même
-                        if (!(client.getKey() == username) && (client.getValue().isConnected())) {
+                        if (!(client.getKey() == username) && (client.getValue().isConnected())  ) {
                             client.getValue().getSocOut().println(username + " :" + line);
+                        }
 
-                            //Remplir l'historique
-                            FileWriter fw = new FileWriter("./src/files/"+client.getKey()+"Historique.txt",true);
+                        else if(!(client.getKey() == username) && !(client.getValue().isConnected()) ){
+                            //Rempli le fichier durant la deconnexion
+                            FileWriter fw = new FileWriter("./src/files/"+client.getKey()+"Deconnexion.txt",true);
                             fw.write( username + " : " +line);
                             fw.write("\n");
                             fw.close();
 
                         }
 
-                        else if(!(client.getKey() == username) && !(client.getValue().isConnected())){
-                            FileWriter fw = new FileWriter("./src/files/"+client.getKey()+"Deconnexion.txt",true);
-                            fw.write( client.getKey() + " : " +line);
-                            fw.write("\n");
-                            fw.close();
-
-
-                        }
                     }
+                    //Remplir l'historique
+                    FileWriter fh = new FileWriter("./src/files/Historique.txt",true);
+                    fh.write( username + " : " +line);
+                    fh.write("\n");
+                    fh.close();
+
 
                 }
                 //L'utilisateur se reconnect après une déconnexion
