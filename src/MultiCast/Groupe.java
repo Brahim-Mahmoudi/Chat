@@ -1,10 +1,10 @@
 package MultiCast;
 
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.*;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Groupe {
 
@@ -13,6 +13,10 @@ public class Groupe {
 
     //Boolean qui passe à true quand l'utilisateur quitte le groupe
     static boolean quitteLeGroupe = false;
+
+    static String port= null;
+
+    static Set<String[]> users = new HashSet<>(); //<NomUser,Port>
 
     public static void main(String[] args) throws IOException {
 
@@ -24,13 +28,42 @@ public class Groupe {
             System.out.println("Bonjour, veuillez entrer votre nom d'utilisateur pour vous connecter");
             BufferedReader stdIn = null;
             stdIn = new BufferedReader(new InputStreamReader(System.in));
-            nomUtilisateur = stdIn.readLine();
+            String nom = null;
+
+            while(true){
+                nom = stdIn.readLine();
+                boolean nomDejaPresent = false;
+                System.out.println("size : "+users.size());
+                for(String[] Object : users){
+                    System.out.println("testttt");
+                    if (Object[0] == nom && Object[1] == args[0]){
+                        System.out.println("Cet utilisateur existe déja dans ce groupe");
+                        nomDejaPresent=true;
+                    }
+                }
+
+                if(nomDejaPresent){
+                    System.out.println("Veuillez utiliser un autre nom d'utilisateur ");
+                }else{
+                    System.out.println("test2");
+                    nomUtilisateur = nom;
+                    String[] tab = new String[]{nom,args[0]};
+                    System.out.println("tab[0] : "+ tab[0] + " "+ tab[1]);
+                    users.add(tab);
+                    System.out.println("size : "+users.size());
+                    break;
+                }
+
+            }
+
 
             //Le premier argument entré par l'utilisateur au lancement est le numero de port
             int numeroDePort = Integer.parseInt(args[0]);
 
             //Le deuxième argument entré par l'utilisateur au lancement est l'adresse IP du groupe qu'il veut rejoindre
             InetAddress ipGroupe = InetAddress.getByName(args[1]);
+            //Permet de nommer les fichiers historique
+            port = args[0];
 
             //Creation de la socket multicast
             MulticastSocket socketMulticast = new MulticastSocket(numeroDePort);
@@ -47,13 +80,43 @@ public class Groupe {
 
             //ETAPE 3: Gestion de l'envoie des messages
             System.out.println("Vous êtes connecté au groupe, vous pouvez maintenant envoyer des messages");
+
+            try {
+
+                // Cree un fichier d'historique par groupe
+                File f = new File("../files/"+port+"Historique.txt");
+                f.createNewFile();
+            }
+            catch (Exception e) {
+                System.err.println(e);
+            }
+
+
+
+            // ON AFFICHE L'Historique
+            BufferedReader lecteurAvecBuffer = null;
+            String ligne;
+            // On lui affiche les messages qu'il n'a pas reçu
+
+
+            lecteurAvecBuffer = new BufferedReader(new FileReader("../files/"+port+"Historique.txt"));
+            while ((ligne = lecteurAvecBuffer.readLine()) != null)
+            {
+                // Afficher le contenu du fichier
+                System.out.println(ligne);
+            }
+            lecteurAvecBuffer.close();
+
+
+
             while(true){
                 String message;
                 message = stdIn.readLine();
 
-                //Si l'utilisateur tape "exit", c'est qu'il désire quitter le groupe
+                //Si l'utilisateur tape "deconnexion", c'est qu'il désire quitter le groupe
                 if(message.equals("deconnexion")){
                     quitteLeGroupe = true;
+                    users.remove(new String[]{nomUtilisateur,port});
                     socketMulticast.leaveGroup(ipGroupe);
                     socketMulticast.close();
                     break;
@@ -67,6 +130,11 @@ public class Groupe {
 
                 //On envoie le message dans le socket à tout les membre du groupe
                 socketMulticast.send(bufferDEcriture);
+                //Remplir l'historique
+                FileWriter fh = new FileWriter("../files/"+port+"Historique.txt",true);
+                fh.write( message);
+                fh.write("\n");
+                fh.close();
             }
 
 
@@ -83,7 +151,6 @@ public class Groupe {
     }
 
     static class ThreadLecture implements Runnable{
-
         private MulticastSocket socketMulticast;
         private SocketAddress adressGroup;
         private static final int LONGUEUR_MAX = 1000;
@@ -92,6 +159,7 @@ public class Groupe {
             this.socketMulticast = socketMulticast;
             this.adressGroup = adressGroup;
         }
+
 
         @Override
         public void run() {
@@ -119,5 +187,7 @@ public class Groupe {
             }
 
         }
+
+
     }
 }

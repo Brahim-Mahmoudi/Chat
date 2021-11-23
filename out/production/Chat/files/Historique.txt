@@ -1,4 +1,2 @@
-bramssey : allo
-brams : ca va
-yaz : salut
-yaz : salut
+yaz : ca va
+bramssey : oui
