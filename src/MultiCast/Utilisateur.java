@@ -17,7 +17,6 @@ public class Utilisateur {
 
     static String port= null;
 
-    static HashMap<String,Integer> utilisateurs = new HashMap<>(); //<NomUser,Port>
 
     public static void main(String[] args) throws IOException {
 
