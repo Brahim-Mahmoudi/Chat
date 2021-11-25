@@ -3,10 +3,11 @@ package MultiCast;
 
 import java.io.*;
 import java.net.*;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
-public class Groupe {
+public class Utilisateur {
 
     //Nom de l'utilisateur qui rentre dans le groupe
     static String nomUtilisateur;
@@ -16,54 +17,84 @@ public class Groupe {
 
     static String port= null;
 
-    static Set<String[]> users = new HashSet<>(); //<NomUser,Port>
+    static HashMap<String,Integer> utilisateurs = new HashMap<>(); //<NomUser,Port>
 
     public static void main(String[] args) throws IOException {
 
         try {
 
             //ETAPE 1 : Gestion des arguments en entrée du main
+            //Le premier argument entré par l'utilisateur au lancement est le numero de port
+            int numeroDePort = Integer.parseInt(args[0]);
+            port = args[0];
+
+            //Le deuxième argument entré par l'utilisateur au lancement est l'adresse IP du groupe qu'il veut rejoindre
+            InetAddress ipGroupe = InetAddress.getByName(args[1]);
+
+
+
+            // Cree un fichier qui stocke les noms des utilisateurs du groupe
+            try {
+
+                File nomDUtilisateurs = new File("../files/"+port+"NomDUtilisateurs.txt");
+                nomDUtilisateurs.createNewFile();
+            }
+            catch (Exception e) {
+                System.err.println(e);
+            }
 
             //Lecture du nom d'utilisateur
             System.out.println("Bonjour, veuillez entrer votre nom d'utilisateur pour vous connecter");
             BufferedReader stdIn = null;
             stdIn = new BufferedReader(new InputStreamReader(System.in));
             String nom = null;
+            nom = stdIn.readLine();
 
-            while(true){
-                nom = stdIn.readLine();
-                boolean nomDejaPresent = false;
-                System.out.println("size : "+users.size());
-                for(String[] Object : users){
-                    System.out.println("testttt");
-                    if (Object[0] == nom && Object[1] == args[0]){
-                        System.out.println("Cet utilisateur existe déja dans ce groupe");
-                        nomDejaPresent=true;
+
+
+            boolean nomDejaPresent = false;
+
+            while(true) {
+                // On parcourt le fichier nom d'utilisateur du groupe
+                BufferedReader lecteurNomUtilisateurs = null;
+                String username;
+                lecteurNomUtilisateurs = new BufferedReader(new FileReader("../files/"+port+"NomDUtilisateurs.txt"));
+                while ((username = lecteurNomUtilisateurs.readLine()) != null) {
+                    // Verifier que le nom d'utilisateur n'existe pas
+                    if (username.equals(nom)) {
+                        System.out.println("Ce nom d'utilisateur existe déjà, veuillez ressaisir un nom d'utilisateur");
+                        nomDejaPresent = true;
+                        break;
+
                     }
+
                 }
 
                 if(nomDejaPresent){
-                    System.out.println("Veuillez utiliser un autre nom d'utilisateur ");
-                }else{
-                    System.out.println("test2");
-                    nomUtilisateur = nom;
-                    String[] tab = new String[]{nom,args[0]};
-                    System.out.println("tab[0] : "+ tab[0] + " "+ tab[1]);
-                    users.add(tab);
-                    System.out.println("size : "+users.size());
+                    //On ressaisit le username
+                    nom = stdIn.readLine();
+                    nomDejaPresent = false;
+                }
+
+                else{
+                    //Le username n'existe pas, on peut continuer
                     break;
                 }
 
+                lecteurNomUtilisateurs.close();
             }
 
 
-            //Le premier argument entré par l'utilisateur au lancement est le numero de port
-            int numeroDePort = Integer.parseInt(args[0]);
 
-            //Le deuxième argument entré par l'utilisateur au lancement est l'adresse IP du groupe qu'il veut rejoindre
-            InetAddress ipGroupe = InetAddress.getByName(args[1]);
-            //Permet de nommer les fichiers historique
-            port = args[0];
+
+
+            //Ajout de l'utilisateur au fichier
+            nomUtilisateur = nom;
+
+            FileWriter nouvelUtilisateur = new FileWriter("../files/"+port+"NomDUtilisateurs.txt",true);
+            nouvelUtilisateur.write(nomUtilisateur);
+            nouvelUtilisateur.write("\n");
+            nouvelUtilisateur.close();
 
             //Creation de la socket multicast
             MulticastSocket socketMulticast = new MulticastSocket(numeroDePort);
@@ -108,7 +139,7 @@ public class Groupe {
             lecteurAvecBuffer.close();
 
 
-
+            //Gestion des messages envoyés
             while(true){
                 String message;
                 message = stdIn.readLine();
@@ -116,10 +147,37 @@ public class Groupe {
                 //Si l'utilisateur tape "deconnexion", c'est qu'il désire quitter le groupe
                 if(message.equals("deconnexion")){
                     quitteLeGroupe = true;
-                    users.remove(new String[]{nomUtilisateur,port});
+
+                    //On cherche à supprimer le nom de l'utilisateur qui se deconnecte du fichier qui stocke les noms d'utilisateurs du groupe
+                    ArrayList<String> contenueFichierNomUtilisateur = new ArrayList<String>();
+                    // On parcourt le fichier nom d'utilisateur du groupe
+                    BufferedReader lecteurFichierNomUtilisateurs = null;
+                    String ligneFichierNomUtilisateurs;
+                    lecteurFichierNomUtilisateurs = new BufferedReader(new FileReader("../files/"+port+"NomDUtilisateurs.txt"));
+
+                    //Parcourt du fichier
+                    while ((ligneFichierNomUtilisateurs = lecteurFichierNomUtilisateurs.readLine()) != null) {
+
+                        if (!(ligneFichierNomUtilisateurs.equals(nomUtilisateur))) {
+                            contenueFichierNomUtilisateur.add(ligneFichierNomUtilisateurs);
+                        }
+                    }
+
+                    lecteurFichierNomUtilisateurs.close();
+
+                    //On ecrase le fichier avec le contenue de la liste dans laquelle on a stocke tous les nom d'utilisateurs sauf celui du user qui se deconnecte
+
+                    FileWriter ecraseFichierNomUtilisateurs = new FileWriter("../files/"+port+"NomDUtilisateurs.txt",false);
+                    for(String nomDUtilisateur : contenueFichierNomUtilisateur){
+                        ecraseFichierNomUtilisateurs.write(nomDUtilisateur);
+                        ecraseFichierNomUtilisateurs.write("\n");
+                    }
+
+                    ecraseFichierNomUtilisateurs.close();
                     socketMulticast.leaveGroup(ipGroupe);
                     socketMulticast.close();
                     break;
+
                 }
 
                 //On ajoute le nom d'utilisateur de la personne qui envoie le message pour l'afficher à la personne qui le recoit
@@ -132,7 +190,7 @@ public class Groupe {
                 socketMulticast.send(bufferDEcriture);
                 //Remplir l'historique
                 FileWriter fh = new FileWriter("../files/"+port+"Historique.txt",true);
-                fh.write( message);
+                fh.write(message);
                 fh.write("\n");
                 fh.close();
             }
