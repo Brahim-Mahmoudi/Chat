@@ -1,10 +1,9 @@
 package stream;
 
-/***
- * EchoServer
- * Example of a TCP server
- * Date: 10/01/04
- * Authors:
+/**
+ *La classe permet de gérer les interactions avec le serveur. Elle gère les demande de connexion, l'attribution
+ * de noms d'utilisateurs aux clients et crée les thread pour chaque client.
+ * @authors Brahim Mahmoudi, El Yazid Dakhil
  */
 
 
@@ -25,6 +24,11 @@ public class Server {
             e.printStackTrace();
         }
     }
+
+    /**
+     * Permet de lancer le serveur
+     * @param args, args[0] est le numéro de port sur lequel le serveur est connecte
+     */
 
     public static void main(String[] args){
         ServerSocket listenSocket;

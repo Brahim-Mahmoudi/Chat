@@ -15,19 +15,17 @@ import java.io.PrintStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+/**
+ * La classe permet de gérer l'interaction de l'utilisateur avec l'IHM. Elle recupère les messages taper par l'utilisateur,
+ * et les envoient sur la socket. Elle affiche également les messages reçuent par l'utilisateur sous le bon format.
+ **/
 
 public class Client {
-
-
-  /**
-  *  main method
-  *  accepts a connection, receives a message from client then sends an echo to the client
-  **/
 
   static BufferedReader socIn = null;
   static PrintStream socOut = null;
   static BufferedReader stdIn = null;
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
 
         String username = "";
         Socket echoSocket = null;

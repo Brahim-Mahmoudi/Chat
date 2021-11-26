@@ -4,8 +4,16 @@ package MultiCast;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+
+
+/**
+ * La classe Utilisateur gère la connexion d'un utilisateur à un groupe, en créant une socket multicast.
+ * L'utilisateur peut également saisir un nom d'utilisateur, pour que l'on repère facilement qui envoie les messages.
+ * Un système d'historique est également implémenté, permettant aux nouveaux utilisateurs qui se connectent
+ * d'avoir accès à ce qui s'est dit avant qu'ils n'arrivent
+ * @author Brahim Mahmoudi, El Yazid Dakhil
+ */
+
 
 public class Utilisateur {
 
@@ -17,7 +25,12 @@ public class Utilisateur {
 
     static String port= null;
 
-
+    /**
+     * Permet de lancer l'application
+     * @param args, args[0] correspond au numéro de port et args[1] à l'adresse IP du groupe que
+     *              l'utilisateur souhaite rejoindre
+     * @throws IOException
+     */
     public static void main(String[] args) throws IOException {
 
         try {
@@ -207,6 +220,9 @@ public class Utilisateur {
 
     }
 
+    /**
+     * La classe ThreadLecture, est un thread gérant les messages reçuent par l'utilisateur.
+     */
     static class ThreadLecture implements Runnable{
         private MulticastSocket socketMulticast;
         private SocketAddress adressGroup;
@@ -217,6 +233,9 @@ public class Utilisateur {
             this.adressGroup = adressGroup;
         }
 
+        /**
+         * La méthode lance le thread
+         */
 
         @Override
         public void run() {

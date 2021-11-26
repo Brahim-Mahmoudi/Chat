@@ -11,6 +11,10 @@ import java.io.*;
 import java.net.*;
 import java.util.Map;
 
+/**
+ * La classe permet de gérer un utilisateur, et notemment d'envoyer ses messages aux utilisateurs avec lesquels
+ * il souhaite communiquer
+ */
 public class ClientHelperThread
         extends Thread {
 
@@ -20,13 +24,16 @@ public class ClientHelperThread
     private  BufferedReader socIn;
     private PrintStream socOut;
     private File fichierDeconnexion;
-    private File fichierHistorique;
     private PrintWriter ecrireFichierDeco;
-    private PrintWriter ecrireFichierHisto;
 
 
-
-
+    /**
+     * Constructeur de la classe ClientHelperThread
+     * @param s, la socket
+     * @param username, son nom d'utilisateur
+     * @param socIn, le buffer d'entrée de la socket
+     * @param socOut, le buffer de sortie de la socket
+     */
     ClientHelperThread(Socket s,String username,BufferedReader socIn,PrintStream socOut) {
         this.clientSocket = s;
         this.username = username;
@@ -46,7 +53,8 @@ public class ClientHelperThread
     }
 
     /**
-     * receives a request from client then sends an echo to the client
+     * Recoit un message de l'utilisateur, rajoute son nom d'utilisateur au debut du message, écrit ce message dans
+     * l'historique de la conversation, et l'envoit aux autres utilisateurs.
      **/
     public void run() {
 
@@ -151,21 +159,21 @@ public class ClientHelperThread
         }
     }
 
-    public synchronized void setIsConnected(boolean isConnected){
-        this.isConnected = isConnected;
-    }
-
-
-
+    /**
+     * Permet de recuperer l'attribut isConnected, qui permet de savoir si le client est connecte ou non
+     * @return l'attribut isConnected
+     */
     public synchronized boolean isConnected() {
         return isConnected;
     }
 
+    /**
+     * Permet de recuperer le buffer de sortie de la socket
+     * @return le buffer de sortie de la socket
+     */
     public PrintStream getSocOut() {
         return socOut;
     }
 
-    public PrintWriter getEcrireFichierDeco() {
-        return ecrireFichierDeco;
-    }
+
 }
