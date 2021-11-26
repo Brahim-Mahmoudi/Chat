@@ -145,14 +145,6 @@ public class ClientHelperThread
 
     }
 
-    public synchronized void killThread(){
-        try {
-            clientSocket.close();
-            this.interrupt();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     /**
      * Permet de recuperer l'attribut isConnected, qui permet de savoir si le client est connecte ou non
