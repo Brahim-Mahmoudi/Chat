@@ -23,15 +23,15 @@ public class Utilisateur {
     //Boolean qui passe à true quand l'utilisateur quitte le groupe
     static boolean quitteLeGroupe = false;
 
+    //numero de port entré par l'utilisateur
     static String port= null;
 
     /**
      * Permet de lancer l'application
      * @param args, args[0] correspond au numéro de port et args[1] à l'adresse IP du groupe que
      *              l'utilisateur souhaite rejoindre
-     * @throws IOException
      */
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args){
 
         try {
 
