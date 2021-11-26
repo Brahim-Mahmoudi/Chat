@@ -1,9 +1,3 @@
-/***
- * ClientThread
- * Example of a TCP server
- * Date: 14/12/08
- * Authors:
- */
 
 package stream;
 
@@ -14,6 +8,7 @@ import java.util.Map;
 /**
  * La classe permet de gérer un utilisateur, et notemment d'envoyer ses messages aux utilisateurs avec lesquels
  * il souhaite communiquer
+ * @author Brahim Mahmoudi, El Yazid Dakhil
  */
 public class ClientHelperThread
         extends Thread {

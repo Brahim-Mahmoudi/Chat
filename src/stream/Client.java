@@ -1,12 +1,5 @@
-/***
- * EchoClient
- * Example of a TCP client 
- * Date: 10/01/04
- * Authors:
- */
+
 package stream;
-
-
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,6 +11,7 @@ import java.net.UnknownHostException;
 /**
  * La classe permet de gérer l'interaction de l'utilisateur avec l'IHM. Elle recupère les messages taper par l'utilisateur,
  * et les envoient sur la socket. Elle affiche également les messages reçuent par l'utilisateur sous le bon format.
+ * @author El Yazid Dakhil, Brahim Mahmoudi
  **/
 
 public class Client {
